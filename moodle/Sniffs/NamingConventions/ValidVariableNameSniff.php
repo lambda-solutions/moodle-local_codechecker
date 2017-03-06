@@ -51,15 +51,15 @@ class moodle_Sniffs_NamingConventions_ValidVariableNameSniff
         $membername = ltrim($tokens[$stackptr]['content'], '$');
 
         if (preg_match('/[A-Z]+/', $membername)) {
-            $error = "Member variable \"$membername\" must be all lower-case";
-            $phpcsfile->addError($error, $stackptr);
+            $error = "Member variable \"$membername\" should be all lower-case";
+            $phpcsfile->addWarning($error, $stackptr);
         }
 
         // Find underscores in variable names (accepting $_foo for private vars).
         $pos = strpos($membername, '_');
         if ($pos > 1) {
-            $error = "Member variable \"$membername\" must not contain underscores.";
-            $phpcsfile->addError($error, $stackptr);
+            $error = "Member variable \"$membername\" should not contain underscores.";
+            $phpcsfile->addWarning($error, $stackptr);
         }
 
         // Must not be preceded by 'var' keyword.
@@ -117,13 +117,13 @@ class moodle_Sniffs_NamingConventions_ValidVariableNameSniff
      */
     private function validate_moodle_variable_name($varname, PHP_CodeSniffer_File $phpcsfile, $stackptr) {
         if (preg_match('/[A-Z]+/', $varname) && !in_array($varname, self::$allowedglobals)) {
-            $error = "Variable \"$varname\" must be all lower-case";
-            $phpcsfile->addError($error, $stackptr);
+            $error = "Variable \"$varname\" should be all lower-case";
+            $phpcsfile->addWarning($error, $stackptr);
         }
 
         if (strpos($varname, '_') !== false && !in_array($varname, self::$allowedglobals)) {
-            $error = "Variable \"$varname\" must not contain underscores.";
-            $phpcsfile->addError($error, $stackptr);
+            $error = "Variable \"$varname\" should not contain underscores.";
+            $phpcsfile->addWarning($error, $stackptr);
         }
     }
 }
