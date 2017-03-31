@@ -109,14 +109,14 @@ class moodle_Sniffs_NamingConventions_ValidFunctionNameSniff
                 !in_array($methodname, $this->permittedmethods)) {
 
             if ($scopespecified === true) {
-                $error = ucfirst($scope) . ' method name "' . $classname . '::' .
-                        $methodname .'" must be in lower-case letters only';
+                $warning = ucfirst($scope) . ' method name "' . $classname . '::' .
+                        $methodname .'" should be in lower-case letters only';
             } else {
-                $error = 'method name "' . $classname . '::' . $methodname .
-                        '" must be in lower-case letters only';
+                $warning = 'method name "' . $classname . '::' . $methodname .
+                        '" should be in lower-case letters only';
             }
 
-            $phpcsfile->adderror($error, $stackptr);
+            $phpcsfile->addWarning($warning, $stackptr);
             return;
         }
     }
