@@ -1,5 +1,76 @@
-Changes in version 2.5.4 (to be released) - Giveme a nice title, please!
-------------------------------------------------------------------------
+Changes in version 2.9.8 (20201002) - Bye and thank you, phpcs 2.x
+------------------------------------------------------------------
+- [PR#83](https://github.com/moodlehq/moodle-local_codechecker/pull/83) and [PR#84](https://github.com/moodlehq/moodle-local_codechecker/pull/84): Allow a list of files to be checked (Sam Marshall).
+- [PR#80](https://github.com/moodlehq/moodle-local_codechecker/pull/80): Remove require of now-deleted coursecatlib.php (Jun Pataleta).
+- Several travis changes:
+    - [PR#79](https://github.com/moodlehq/moodle-local_codechecker/pull/79): Bump to use moodlehq/moodle-plugin-ci v3.
+    - [PR#81](https://github.com/moodlehq/moodle-local_codechecker/pull/81): Add support for 310 branch.
+- Small README changes: information section improved and travis status badge update to show travis.com build status. 
+
+Changes in version 2.9.7 (20200718) - Bye bye, JS
+-------------------------------------------------
+- [PR#75](https://github.com/moodlehq/moodle-local_codechecker/pull/75) and [PR#77](https://github.com/moodlehq/moodle-local_codechecker/pull/77): Small tweaks for better transition to phpcs3.
+- CONTRIB-8122: Stop processing non-php files (runner and UI).
+
+Changes in version 2.9.6 (20200611) - June's Roentgenium
+--------------------------------------------------------
+- [PR#63](https://github.com/moodlehq/moodle-local_codechecker/pull/63): Make MOODLE_INTERNAL check declare() aware (Peter Burnett).
+- [PR#72](https://github.com/moodlehq/moodle-local_codechecker/pull/72): Minor php74 fixes and travis refactor.
+
+Changes in version 2.9.5 (20200401) - Poisson d'avril
+-----------------------------------------------------
+- CONTRIB-8024: Process all files as UTF-8 encoded (defined @ standard level).
+- CONTRIB-6175: Only process PHP files (defined @ standard level).
+- [PR#69](https://github.com/moodlehq/moodle-local_codechecker/pull/69): Upgrade PHPCompatibility to 9.3.5+ (9fb3244).
+- CONTRIB-8031: Detect wrong uses of $PAGE and $OUTPUT in renderers and blocks (Tim Hunt).
+- MDLSITE-6093: Don't require MOODLE_INTERNAL check for pure 1-artifact (class, interface, trait) files.
+- [PR#65](https://github.com/moodlehq/moodle-local_codechecker/pull/65): PHP 7.4 support.
+- [PR#64](https://github.com/moodlehq/moodle-local_codechecker/pull/64): Add Travis support for 38 and 39 branches.
+- [PR#62](https://github.com/moodlehq/moodle-local_codechecker/pull/62): Improved command line instructions (Steven McCullagh).
+
+Changes in version 2.9.4 (20191112) - Late Beorc
+------------------------------------------------
+- [PR#60](https://github.com/moodlehq/moodle-local_codechecker/pull/60): Added support for ``require_admin`` since MDL-58439 (Brendan Heywood).
+- CONTRIB-7165: Allow type-hint for foreach variable (Daniel Thee Roperto).
+- [PR#58](https://github.com/moodlehq/moodle-local_codechecker/pull/58): Allow tearDownAfterClass as a valid function name (Mikhail Golenkov).
+- MDLSITE-5908: Respect eslint configuration comments in JS files (Ruslan Kabalin).
+- Various README, thirdpartylib, travis fixes (Tobias Uhmann and others).
+
+Changes in version 2.9.3 (20190118) - Selectivenesses (take #2)
+---------------------------------------------------------------
+- NOBUG: Some minor changes towards stable travis builds.
+- INCOMPETENCE: Fix the version.php information that Eloy missed for 2.9.2 :-)
+
+Changes in version 2.9.2 (20190115) - Selectivenesses
+-----------------------------------------------------
+- NOBUG: Updated PHP_CodeSniffer to 2.9.2+ (4665f64).
+- NOBUG: Updated PHPCompatibility to 9.1.1+ (4487042)
+- NOBUG: Added support for PHP 7.3 and Moodle 3.6/3.7dev.
+- MDLSITE-5660: Allow spaced, non spaced and nullable return types in function/method declarations.
+
+Changes in version 2.7.2 (20180701) - Barcelona awesomeness
+-----------------------------------------------------------
+- NOBUG: Upgrade PHPCompatibility to 8.1.0+ (609be5c).
+- MDLSITE-2825: Allow obj-op / fluid interfaces + indentation (4 char) checks.
+- [PR#46](https://github.com/moodlehq/moodle-local_codechecker/pull/46): Privacy support (null provider).
+
+Changes in version 2.7.1 (20180120) - Slowly yours
+--------------------------------------------------
+- NOBUG: Bump to moodlerooms/moodle-plugin-ci v2. Apply to 32_STABLE and up in travis conf. Problems with behat forces us to keep it disabled.
+- [PR#45](https://github.com/moodlehq/moodle-local_codechecker/pull/45): Upgrade PHPCompatibility to 7.1.5. (Mark Nielsen)
+- [PR#41](https://github.com/moodlehq/moodle-local_codechecker/pull/41): Allow newline characters before or after object operators. (Ankit Agarwal)
+
+Changes in version 2.7.0 (20170527) - Boosting you!
+---------------------------------------------------
+- [PR#40|](https://github.com/moodlehq/moodle-local_codechecker/pull/40): Update PHPCompatibility to 7.1.4. (Mark Nielsen)
+- NOBUG: Add instructions for use with Sublime Text editor. (Maria Sorica)
+- CONTRIB-6619: Make behat tests pass under Boost.
+- MDLSITE-3688: Detect missing login checks and side effects on internal check. (Dan Poltawski)
+- NOBUG: Travis: Add support for 32 and 33 stable runs.
+- NOBUG: Updated PHP_CodeSniffer to 2.7.0 version.
+
+Changes in version 2.5.4 (20160930) - Internally safe
+-----------------------------------------------------
 - NOBUG: Updated PHP_CodeSniffer to 2.6.2 version.
 - MDLSITE-3688: Verify all files have MOODLE_INTERNAL or require config.php (Dan Poltawski)
 - [PR#31](https://github.com/moodlehq/moodle-local_codechecker/pull/31): Avoid PHPUnit's setUpBeforeClass() to generate CS errors. (David Mudrák)
