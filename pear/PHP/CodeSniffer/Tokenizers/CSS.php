@@ -89,6 +89,7 @@ class PHP_CodeSniffer_Tokenizers_CSS extends PHP_CodeSniffer_Tokenizers_PHP
                 || $token['code'] === T_FOR
                 || $token['code'] === T_FOREACH
                 || $token['code'] === T_WHILE
+                || $token['code'] === T_DEC
             ) {
                 $token['type'] = 'T_STRING';
                 $token['code'] = T_STRING;
@@ -174,14 +175,14 @@ class PHP_CodeSniffer_Tokenizers_CSS extends PHP_CodeSniffer_Tokenizers_PHP
             if ($token['code'] === T_COMMENT
                 && $multiLineComment === false
                 && (substr($token['content'], 0, 2) === '//'
-                || $token['content']{0} === '#')
+                || $token['content'][0] === '#')
             ) {
                 $content = ltrim($token['content'], '#/');
 
                 // Guard against PHP7+ syntax errors by stripping
                 // leading zeros so the content doesn't look like an invalid int.
                 $leadingZero = false;
-                if ($content{0} === '0') {
+                if ($content[0] === '0') {
                     $content     = '1'.$content;
                     $leadingZero = true;
                 }
@@ -197,7 +198,7 @@ class PHP_CodeSniffer_Tokenizers_CSS extends PHP_CodeSniffer_Tokenizers_PHP
                     $content = substr($content, 1);
                 }
 
-                if ($token['content']{0} === '#') {
+                if ($token['content'][0] === '#') {
                     // The # character is not a comment in CSS files, so
                     // determine what it means in this context.
                     $firstContent = $commentTokens[0]['content'];
@@ -389,7 +390,7 @@ class PHP_CodeSniffer_Tokenizers_CSS extends PHP_CodeSniffer_Tokenizers_PHP
 
                     // Needs to be in the format "url(" for it to be a URL.
                     if ($finalTokens[$x]['code'] !== T_OPEN_PARENTHESIS) {
-                        continue;
+                        continue 2;
                     }
 
                     // Make sure the content isn't empty.
@@ -400,7 +401,7 @@ class PHP_CodeSniffer_Tokenizers_CSS extends PHP_CodeSniffer_Tokenizers_PHP
                     }
 
                     if ($finalTokens[$y]['code'] === T_CLOSE_PARENTHESIS) {
-                        continue;
+                        continue 2;
                     }
 
                     if (PHP_CODESNIFFER_VERBOSITY > 1) {
@@ -444,6 +445,30 @@ class PHP_CodeSniffer_Tokenizers_CSS extends PHP_CodeSniffer_Tokenizers_PHP
                             $content = PHP_CodeSniffer::prepareForOutput($finalTokens[($x + 1)]['content']);
                             echo "\t\t=> token content changed to: $content".PHP_EOL;
                         }
+                    }
+                } else if ($finalTokens[$stackPtr]['content'][0] === '-'
+                    && $finalTokens[($stackPtr + 1)]['code'] === T_STRING
+                ) {
+                    if (isset($finalTokens[($stackPtr - 1)]) === true
+                        && $finalTokens[($stackPtr - 1)]['code'] === T_STRING
+                    ) {
+                        $newContent = $finalTokens[($stackPtr - 1)]['content'].$finalTokens[$stackPtr]['content'].$finalTokens[($stackPtr + 1)]['content'];
+
+                        if (PHP_CODESNIFFER_VERBOSITY > 1) {
+                            echo "\t\t* token is a string joiner; ignoring this and previous token".PHP_EOL;
+                            $old = PHP_CodeSniffer::prepareForOutput($finalTokens[($stackPtr + 1)]['content']);
+                            $new = PHP_CodeSniffer::prepareForOutput($newContent);
+                            echo "\t\t=> token ".($stackPtr + 1)." content changed from \"$old\" to \"$new\"".PHP_EOL;
+                        }
+
+                        $finalTokens[($stackPtr + 1)]['content'] = $newContent;
+                        unset($finalTokens[$stackPtr]);
+                        unset($finalTokens[($stackPtr - 1)]);
+                    } else {
+                        $newContent = $finalTokens[$stackPtr]['content'].$finalTokens[($stackPtr + 1)]['content'];
+
+                        $finalTokens[($stackPtr + 1)]['content'] = $newContent;
+                        unset($finalTokens[$stackPtr]);
                     }
                 }//end if
 

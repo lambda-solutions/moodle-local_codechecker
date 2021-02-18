@@ -17,6 +17,9 @@
 /**
  * This file contains helper testcase for testing "moodle" CS Sniffs.
  *
+ * To run the tests for the Moodle sniffs, you need to use:
+ *     vendor/bin/phpunit local/codechecker/moodle/tests/moodlestandard_test.php
+ *
  * @package    local_codechecker
  * @subpackage phpunit
  * @category   phpunit
@@ -33,8 +36,27 @@ if (is_file(__DIR__ . '/../pear/PHP/CodeSniffer.php') === true) {
     require_once('PHP/CodeSniffer.php');
 }
 
+// Interim classes providing conditional extension, so I can run
+// these plugin tests against different Moodle branches that are
+// using different phpunit (namespaced or no) classes.
+// @codingStandardsIgnoreStart
+if (class_exists('PHPUnit_Framework_TestCase')) {
+    abstract class conditional_PHPUnit_Framework_TestCase extends PHPUnit_Framework_TestCase {
+    }
+} else {
+    abstract class conditional_PHPUnit_Framework_TestCase extends PHPUnit\Framework\TestCase {
+    }
+}
+// @codingStandardsIgnoreEnd
+
 /**
  * Specialized test case for easy testing of "moodle" CS Sniffs.
+ *
+ * If you want to run the tests for the Moodle sniffs, you need to
+ * use the specific command-line:
+ *     vendor/bin/phpunit local/codechecker/moodle/tests/moodlestandard_test.php
+ * no tests for this plugin are run as part of a full Moodle PHPunit run.
+ * (This may be a bug?)
  *
  * This class mimics {@link AbstractSniffUnitTest} way to test Sniffs
  * allowing easy process of examples and assertion of result expectations.
@@ -43,7 +65,7 @@ if (is_file(__DIR__ . '/../pear/PHP/CodeSniffer.php') === true) {
  *
  * Note extension & overriding was impossible because of some "final" stuff.
  */
-abstract class local_codechecker_testcase extends PHPUnit_Framework_TestCase {
+abstract class local_codechecker_testcase extends conditional_PHPUnit_Framework_TestCase {
 
     /**
      * @var PHP_CodeSniffer The unique CS instance shared by all test cases.
@@ -82,15 +104,31 @@ abstract class local_codechecker_testcase extends PHPUnit_Framework_TestCase {
      * @param string $standard name of the standard to be tested.
      */
     protected function set_standard($standard) {
-        // Look for the standard in the standard directory.
-        $stdfile = __DIR__ . '/../pear/PHP/CodeSniffer/Standards/' . $standard . '/ruleset.xml';
-        if (file_exists($stdfile)) {
-            $this->standard = $stdfile;
-        } else {
-            // Now try plugin top directory, where moodle and others... reside).
-            $stdfile = __DIR__ . '/../' . $standard . '/ruleset.xml';
+
+        // Since 2.9 arbitrary standard directories are not allowed by default,
+        // only those under the CodeSniffer/Standards dir are detected. Other base
+        // dirs containing standards can be added using CodeSniffer.conf or the
+        // PHP_CODESNIFFER_CONFIG_DATA global (installed_paths setting).
+        // We are using the global way here to avoid changes in the phpcs import.
+        // @codingStandardsIgnoreStart
+        if (!isset($GLOBALS['PHP_CODESNIFFER_CONFIG_DATA']['installed_paths'])) {
+            $localcodecheckerpath = realpath(__DIR__ . '/../');
+            $GLOBALS['PHP_CODESNIFFER_CONFIG_DATA'] = ['installed_paths' => $localcodecheckerpath];
+        }
+        // @codingStandardsIgnoreEnd
+
+        // Basic search of standards in the allowed directories.
+        $stdsearch = array(
+            __DIR__ . '/../pear/PHP/CodeSniffer/Standards', // PHPCS standards dir.
+            __DIR__ . '/..',                                // local_codechecker dir, allowed above via global.
+        );
+
+        foreach ($stdsearch as $stdpath) {
+            $stdpath = realpath($stdpath . '/' . $standard);
+            $stdfile = $stdpath . '/ruleset.xml';
             if (file_exists($stdfile)) {
-                $this->standard = $stdfile;
+                $this->standard = $stdpath; // Need to pass the path here.
+                break;
             }
         }
         // Standard not found, fail.
@@ -180,6 +218,7 @@ abstract class local_codechecker_testcase extends PHPUnit_Framework_TestCase {
             if (defined('PHP_CODESNIFFER_IN_TESTS') === false) {
                 define('PHP_CODESNIFFER_IN_TESTS', true);
             }
+
             // Instantiate the CS safely now.
             self::$phpcs = new PHP_CodeSniffer();
         }
@@ -200,6 +239,8 @@ abstract class local_codechecker_testcase extends PHPUnit_Framework_TestCase {
     protected function verify_cs_results() {
 
         self::$phpcs->initStandard($this->standard, array($this->sniff));
+        self::$phpcs->processRuleset($this->standard . '/ruleset.xml');
+        self::$phpcs->populateTokenListeners();
         self::$phpcs->setIgnorePatterns(array());
 
         // The passed sniff is incorrect.
@@ -264,10 +305,18 @@ abstract class local_codechecker_testcase extends PHPUnit_Framework_TestCase {
      */
     private function assert_results($expectations, $results, $type) {
         foreach ($expectations as $line => $expectation) {
-            // Verify counts for a line are the same.
+            // Build some information to be shown in case of problems.
+            $info = '';
+            if (count($expectation)) {
+                $info .= PHP_EOL . 'Expected: ' . json_encode($expectation);
+            }
             $countresults = isset($results[$line]) ? count($results[$line]) : 0;
+            if ($countresults) {
+                $info .= PHP_EOL . 'Actual: ' . json_encode($results[$line]);
+            }
+            // Verify counts for a line are the same.
             $this->assertSame(count($expectation), $countresults,
-                    'Failed number of ' . $type . ' for line ' . $line . '.');
+                    'Failed number of ' . $type . ' for line ' . $line . '.' . $info);
             // Now verify every expectation requiring matching.
             foreach ($expectation as $key => $expectedcontent) {
                 if (is_string($expectedcontent)) {

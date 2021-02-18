@@ -71,7 +71,7 @@ class PEAR_Sniffs_NamingConventions_ValidFunctionNameSniff extends PHP_CodeSniff
      */
     public function __construct()
     {
-        parent::__construct(array(T_CLASS, T_INTERFACE, T_TRAIT), array(T_FUNCTION), true);
+        parent::__construct(array(T_CLASS, T_ANON_CLASS, T_INTERFACE, T_TRAIT), array(T_FUNCTION), true);
 
     }//end __construct()
 
@@ -98,7 +98,7 @@ class PEAR_Sniffs_NamingConventions_ValidFunctionNameSniff extends PHP_CodeSniff
         $errorData = array($className.'::'.$methodName);
 
         // Is this a magic method. i.e., is prefixed with "__" ?
-        if (preg_match('|^__|', $methodName) !== 0) {
+        if (preg_match('|^__[^_]|', $methodName) !== 0) {
             $magicPart = strtolower(substr($methodName, 2));
             if (isset($this->magicMethods[$magicPart]) === false) {
                  $error = 'Method name "%s" is invalid; only PHP magic methods should be prefixed with a double underscore';
@@ -130,7 +130,7 @@ class PEAR_Sniffs_NamingConventions_ValidFunctionNameSniff extends PHP_CodeSniff
 
         // If it's a private method, it must have an underscore on the front.
         if ($isPublic === false) {
-            if ($methodName{0} !== '_') {
+            if ($methodName[0] !== '_') {
                 $error = 'Private method name "%s" must be prefixed with an underscore';
                 $phpcsFile->addError($error, $stackPtr, 'PrivateNoUnderscore', $errorData);
                 $phpcsFile->recordMetric($stackPtr, 'Private method prefixed with underscore', 'no');
@@ -141,7 +141,7 @@ class PEAR_Sniffs_NamingConventions_ValidFunctionNameSniff extends PHP_CodeSniff
         }
 
         // If it's not a private method, it must not have an underscore on the front.
-        if ($isPublic === true && $scopeSpecified === true && $methodName{0} === '_') {
+        if ($isPublic === true && $scopeSpecified === true && $methodName[0] === '_') {
             $error = '%s method name "%s" must not be prefixed with an underscore';
             $data  = array(
                       ucfirst($scope),
@@ -157,7 +157,7 @@ class PEAR_Sniffs_NamingConventions_ValidFunctionNameSniff extends PHP_CodeSniff
         // prefix if there is one because we cant determine if it is private or
         // public.
         $testMethodName = $methodName;
-        if ($scopeSpecified === false && $methodName{0} === '_') {
+        if ($scopeSpecified === false && $methodName[0] === '_') {
             $testMethodName = substr($methodName, 1);
         }
 
@@ -205,7 +205,7 @@ class PEAR_Sniffs_NamingConventions_ValidFunctionNameSniff extends PHP_CodeSniff
         $errorData = array($functionName);
 
         // Is this a magic function. i.e., it is prefixed with "__".
-        if (preg_match('|^__|', $functionName) !== 0) {
+        if (preg_match('|^__[^_]|', $functionName) !== 0) {
             $magicPart = strtolower(substr($functionName, 2));
             if (isset($this->magicFunctions[$magicPart]) === false) {
                  $error = 'Function name "%s" is invalid; only PHP magic methods should be prefixed with a double underscore';
@@ -232,13 +232,13 @@ class PEAR_Sniffs_NamingConventions_ValidFunctionNameSniff extends PHP_CodeSniff
 
         // If it has a package part, make sure the first letter is a capital.
         if ($packagePart !== '') {
-            if ($functionName{0} === '_') {
+            if ($functionName[0] === '_') {
                 $error = 'Function name "%s" is invalid; only private methods should be prefixed with an underscore';
                 $phpcsFile->addError($error, $stackPtr, 'FunctionUnderscore', $errorData);
                 return;
             }
 
-            if ($functionName{0} !== strtoupper($functionName{0})) {
+            if ($functionName[0] !== strtoupper($functionName[0])) {
                 $error = 'Function name "%s" is prefixed with a package name but does not begin with a capital letter';
                 $phpcsFile->addError($error, $stackPtr, 'FunctionNoCapital', $errorData);
                 return;
@@ -259,17 +259,17 @@ class PEAR_Sniffs_NamingConventions_ValidFunctionNameSniff extends PHP_CodeSniff
         // Every function must have a camel caps part, so check that first.
         if (PHP_CodeSniffer::isCamelCaps($camelCapsPart, false, true, false) === false) {
             $validName        = false;
-            $newCamelCapsPart = strtolower($camelCapsPart{0}).substr($camelCapsPart, 1);
+            $newCamelCapsPart = strtolower($camelCapsPart[0]).substr($camelCapsPart, 1);
         }
 
         if ($packagePart !== '') {
             // Check that each new word starts with a capital.
             $nameBits = explode('_', $packagePart);
             foreach ($nameBits as $bit) {
-                if ($bit{0} !== strtoupper($bit{0})) {
+                if ($bit[0] !== strtoupper($bit[0])) {
                     $newPackagePart = '';
                     foreach ($nameBits as $bit) {
-                        $newPackagePart .= strtoupper($bit{0}).substr($bit, 1).'_';
+                        $newPackagePart .= strtoupper($bit[0]).substr($bit, 1).'_';
                     }
 
                     $validName = false;
